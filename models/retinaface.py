@@ -111,14 +111,14 @@ class RetinaFace(nn.Module):
         fpn = self.fpn(out)
 
         # SSH
-        feature1 = self.ssh1(fpn[0])
-        feature2 = self.ssh2(fpn[1])
-        feature3 = self.ssh3(fpn[2])
-        features = [feature1, feature2, feature3]
+        # feature1 = self.ssh1(fpn[0])
+        # feature2 = self.ssh2(fpn[1])
+        # feature3 = self.ssh3(fpn[2])
+        # features = [feature1, feature2, feature3]
 
-        bbox_regressions = torch.cat([self.BboxHead[i](feature) for i, feature in enumerate(features)], dim=1)
-        classifications = torch.cat([self.ClassHead[i](feature) for i, feature in enumerate(features)],dim=1)
-        ldm_regressions = torch.cat([self.LandmarkHead[i](feature) for i, feature in enumerate(features)], dim=1)
+        bbox_regressions = torch.cat([self.BboxHead[i](feature) for i, feature in enumerate(fpn)], dim=1)
+        classifications = torch.cat([self.ClassHead[i](feature) for i, feature in enumerate(fpn)],dim=1)
+        ldm_regressions = torch.cat([self.LandmarkHead[i](feature) for i, feature in enumerate(fpn)], dim=1)
 
         if self.phase == 'train':
             output = (bbox_regressions, classifications, ldm_regressions)

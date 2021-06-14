@@ -93,6 +93,6 @@ if __name__ == '__main__':
         input_names=input_names,
         output_names=output_names,
         dynamic_axes={'input': [2, 3], 'output': [2, 3], 'outputt': [2, 3], 'outputtt': [2, 3]},
-        opset_version=11)
+        opset_version=12)
 
 
