@@ -14,11 +14,11 @@ from utils.timer import Timer
 
 
 parser = argparse.ArgumentParser(description='Retinaface')
-parser.add_argument('-m', '--trained_model', default='/mnt/hdd/PycharmProjects/Pytorch_Retinaface/weights/Resnet50_epoch_90.pth',
+parser.add_argument('-m', '--trained_model', default='/hdd/PycharmProjects/Pytorch_Retinaface/weights/Resnet50_epoch_20.pth',
                     type=str, help='Trained state_dict file path to open')
 parser.add_argument('--network', default='resnet50', help='Backbone network mobile0.25 or resnet50')
 parser.add_argument('--origin_size', default=False, type=str, help='Whether use origin image size to evaluate')
-parser.add_argument('--save_folder', default='/mnt/hdd/PycharmProjects/Pytorch_Retinaface/prediction', type=str, help='Dir to save txt results')
+parser.add_argument('--save_folder', default='/hdd/PycharmProjects/Pytorch_Retinaface/prediction', type=str, help='Dir to save txt results')
 parser.add_argument('--cpu', action="store_true", default=False, help='Use cpu inference')
 parser.add_argument('--dataset_folder', default='./data/widerface/val/images/', type=str, help='dataset path')
 parser.add_argument('--confidence_threshold', default=0.02, type=float, help='confidence_threshold')
@@ -101,7 +101,7 @@ if __name__ == '__main__':
         img = np.float32(img_raw)
 
         # testing scale
-        target_size = 640
+        target_size = 960
         # max_size = 2150
         im_shape = img.shape
         im_size_min = np.min(im_shape[0:2])
@@ -132,7 +132,7 @@ if __name__ == '__main__':
         scale = scale.to(device)
 
         _t['forward_pass'].tic()
-        loc, conf, landms = net(img)  # forward pass
+        loc, conf = net(img)  # forward pass
         _t['forward_pass'].toc()
         _t['misc'].tic()
         priorbox = PriorBox(cfg, image_size=(im_height, im_width))
@@ -143,25 +143,25 @@ if __name__ == '__main__':
         boxes = boxes * scale / resize
         boxes = boxes.cpu().numpy()
         scores = conf.squeeze(0).data.cpu().numpy()[:, 1]
-        landms = decode_landm(landms.data.squeeze(0), prior_data, cfg['variance'])
+        # landms = decode_landm(landms.data.squeeze(0), prior_data, cfg['variance'])
         scale1 = torch.Tensor([img.shape[3], img.shape[2], img.shape[3], img.shape[2],
                                img.shape[3], img.shape[2], img.shape[3], img.shape[2],
                                img.shape[3], img.shape[2]])
         scale1 = scale1.to(device)
-        landms = landms * scale1 / resize
-        landms = landms.cpu().numpy()
+        # landms = landms * scale1 / resize
+        # landms = landms.cpu().numpy()
 
         # ignore low scores
         inds = np.where(scores > args.confidence_threshold)[0]
         boxes = boxes[inds]
-        landms = landms[inds]
+        # landms = landms[inds]
         scores = scores[inds]
 
         # keep top-K before NMS
         order = scores.argsort()[::-1]
         # order = scores.argsort()[::-1][:args.top_k]
         boxes = boxes[order]
-        landms = landms[order]
+        # landms = landms[order]
         scores = scores[order]
 
         # do NMS
@@ -169,13 +169,13 @@ if __name__ == '__main__':
         keep = py_cpu_nms(dets, args.nms_threshold)
         # keep = nms(dets, args.nms_threshold,force_cpu=args.cpu)
         dets = dets[keep, :]
-        landms = landms[keep]
+        # landms = landms[keep]
 
         # keep top-K faster NMS
         # dets = dets[:args.keep_top_k, :]
         # landms = landms[:args.keep_top_k, :]
 
-        dets = np.concatenate((dets, landms), axis=1)
+        # dets = np.concatenate((dets, landms), axis=1)
         _t['misc'].toc()
 
         # --------------------------------------------------------------------
