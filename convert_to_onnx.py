@@ -14,7 +14,7 @@ from utils.timer import Timer
 
 
 parser = argparse.ArgumentParser(description='Test')
-parser.add_argument('-m', '--trained_model', default='./weights/Resnet50_Final.pth',
+parser.add_argument('-m', '--trained_model', default='/mnt/hdd/PycharmProjects/Pytorch_Retinaface/weights/Resnet50_epoch_20.pth',
                     type=str, help='Trained state_dict file path to open')
 parser.add_argument('--network', default='resnet50', help='Backbone network mobile0.25 or resnet50')
 parser.add_argument('--long_side', default=640,
@@ -77,10 +77,10 @@ if __name__ == '__main__':
     net = net.to(device)
 
     # ------------------------ export -----------------------------
-    output_onnx = 'FaceDetector.onnx'
+    output_onnx = 'resnet50_origin_simplified.onnx'
     print("==> Exporting model to ONNX format at '{}'".format(output_onnx))
     input_names = ["input"]
-    output_names = ["output", "outputt", "outputtt"]
+    output_names = ["output", "outputt"]
     inputs = torch.randn(1, 3, args.long_side, args.long_side).to(device)
 
     torch_out = torch.onnx._export(
@@ -92,7 +92,7 @@ if __name__ == '__main__':
         verbose=False,
         input_names=input_names,
         output_names=output_names,
-        dynamic_axes={'input': [2, 3], 'output': [2, 3], 'outputt': [2, 3], 'outputtt': [2, 3]},
+        dynamic_axes={'input': [2, 3], 'output': [2, 3], 'outputt': [2, 3]},
         opset_version=12)
 
 
